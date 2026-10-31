@@ -1,0 +1,16 @@
+# 패키지와 빌드 결과는 저장소에서 제외합니다.
+node_modules/
+dist/
+coverage/
+
+# 비밀 설정과 로그는 업로드하지 않습니다.
+.env
+.env.*
+!.env.example
+*.log
+
+# 운영체제와 편집기 개인 설정은 제외합니다.
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

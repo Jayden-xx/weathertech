@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="1000" viewBox="0 0 800 1000">
+<title>세로 사진 교체용 예시 영역</title>
+<rect width="800" height="1000" fill="#252623"/>
+<rect x="32" y="32" width="736" height="936" fill="none" stroke="#777971"/>
+<path d="M360 460h80M400 420v80" stroke="#b8c4ac" stroke-width="2"/>
+<text x="400" y="560" fill="#b5b2ac" font-family="Arial,sans-serif" font-size="20" text-anchor="middle">PORTRAIT / PLACEHOLDER</text>
+</svg>

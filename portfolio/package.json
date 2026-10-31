@@ -1,0 +1,9 @@
+{
+  "name": "nuvv-portfolio-components",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node server.mjs",
+    "test": "node --test tests/*.test.js"
+  }
+}
