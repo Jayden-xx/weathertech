@@ -7,7 +7,7 @@
 ## 폴더 구성
 
 ```text
-weather/forecast/
+forecast/
 ├── local/                  Python 로컬 실행본
 │   ├── server.py
 │   ├── 서버실행.cmd
