@@ -8,7 +8,7 @@ const pages={
 const $=id=>document.getElementById(id);
 const page=pages[location.pathname.slice(1)]?location.pathname.slice(1):'outlook';
 const spec=pages[page];
-let statusInfo=null,busy=false,timer=null,nextAt=0,failures=0,last=null,controller=null,disposed=false;
+let statusInfo=null,busy=false,timer=null,nextAt=0,failures=0,last=null,controller=null,disposed=false,lastError=null;
 const missing='미제공';
 function set(id,value){$(id).textContent=value;}
 function fmt(value,unit=''){return value===null||value===undefined?missing:`${value}${unit}`;}
@@ -33,6 +33,7 @@ async function refresh(){if(busy||document.hidden||disposed)return;busy=true;can
   // 조회 중 지역·모드가 바뀌었으면 이전 요청 결과를 새 지역에 표시하지 않습니다.
   if(selectedCode!==$('region').value||selectedIssue!==$('issue').value||demo!==$('demo').checked){delay=0;return;}
   set('checked',timeLabel(data.checkedAt));quota(data.quota);
+  lastError=data.error?.kind||null;
   if(data.ok){last=data;render(data);failures=data.error?failures+1:0;
    if(data.demo)state('모의 응답 · 화면 및 처리 구조 확인용입니다. 실제 기상청 예보가 아닙니다.','demo');
    else if(data.error){state(`이전 자료 표시 · ${data.error.message}`,'error');delay=Math.max(30,data.error.retryAfter||30,Math.min(900,30*2**Math.min(failures,5)));}
@@ -43,7 +44,7 @@ async function refresh(){if(busy||document.hidden||disposed)return;busy=true;can
    state((same?'이전 정상 자료 유지 · ':'')+(data.error?.message||'자료를 불러오지 못했습니다.'),'error');
    if(!same){$('results').hidden=true;$('empty').hidden=false;set('publication','미확인');set('last-success','실제 API 성공 이력 없음');}
   }
- }catch(e){if(disposed)return;failures++;delay=Math.min(900,30*2**Math.min(failures,5));state(e.name==='AbortError'?'요청 시간이 초과되었습니다. 서버 상태를 확인하세요.':`서버 연결 실패 · ${e.message}`,'error');}
+ }catch(e){lastError='NETWORK';if(disposed)return;failures++;delay=Math.min(900,30*2**Math.min(failures,5));state(e.name==='AbortError'?'요청 시간이 초과되었습니다. 서버 상태를 확인하세요.':`서버 연결 실패 · ${e.message}`,'error');}
  finally{clearTimeout(timeout);busy=false;$('refresh').disabled=false;controller=null;if(!disposed)schedule(delay);}
 }
 function el(tag,className,value){const node=document.createElement(tag);if(className)node.className=className;if(value!==undefined)node.textContent=value;return node;}
@@ -75,10 +76,16 @@ rows.forEach((r,i)=>{const v=r[key];if(v===null||v===undefined)return;const labe
 if(rain){node=svgEl('rect',{x:x(i)-14,y:y(v),width:28,height:Math.max(1,255-y(v)),rx:4,class:'bar',tabindex:0,'aria-label':label});svg.append(svgEl('text',{x:x(i),y:y(v)-9,class:'chart-value'},v+'%'));}else node=svgEl('circle',{cx:x(i),cy:y(v),r:5,class:`dot${s}`,tabindex:0,'aria-label':label});
 node.append(svgEl('title',{},label));svg.append(node);});});}
 async function init(){document.title=`${spec.title} · 기후의 흐름`;set('page-title',spec.title);set('breadcrumb',spec.title);set('subtitle',spec.subtitle);set('explainer',spec.explainer);document.querySelector(`[data-page="${page}"]`).classList.add('active');document.querySelector(`[data-page="${page}"]`).setAttribute('aria-current','page');
-try{statusInfo=await getJSON('/api/status');for(const r of statusInfo.regions[page])$('region').add(new Option(`${r.name} · ${r.code}`,r.code));const saved=safeStorage('kma.region.'+page);if(saved&&statusInfo.regions[page].some(r=>r.code===saved))$('region').value=saved;options();regionInfo();setup();quota(statusInfo.quota);set('server-url',statusInfo.url);await refresh();}catch{state('로컬 서버에 연결할 수 없습니다. 서버실행.cmd의 터미널 메시지와 포트를 확인하세요.','error');}}
+try{statusInfo=await getJSON('/api/status');for(const r of statusInfo.regions[page])$('region').add(new Option(`${r.name} · ${r.code}`,r.code));const saved=safeStorage('kma.region.'+page);if(saved&&statusInfo.regions[page].some(r=>r.code===saved))$('region').value=saved;options();
+// 페이지 이동 직후 챗봇의 최종 선택을 첫 조회 전에 반영해 중복 조회를 막습니다.
+try{const p=JSON.parse(sessionStorage.getItem('weatherchat.pending')||'null');if(p?.target?.page===page&&Date.now()-p.created<120000){if(p.target.code&&statusInfo.regions[page].some(r=>r.code===p.target.code))$('region').value=p.target.code;if(p.target.publication&&[...$('issue').options].some(o=>o.value===p.target.publication))$('issue').value=p.target.publication;}}catch{}
+regionInfo();setup();quota(statusInfo.quota);set('server-url',statusInfo.url);await refresh();}catch{state('서버에 연결할 수 없습니다. 로컬 실행은 서버실행.cmd의 터미널 메시지와 포트를 확인하세요.','error');}}
 function changed(){failures=0;last=null;$('results').hidden=true;$('empty').hidden=false;set('publication','미확인');set('last-success','실제 API 성공 이력 없음');if(statusInfo){regionInfo();setup();}safeStorage('kma.region.'+page,$('region').value);if(busy)schedule(0);else void refresh();}
 $('region').addEventListener('change',changed);$('issue').addEventListener('change',changed);$('demo').addEventListener('change',changed);$('refresh').addEventListener('click',()=>void refresh());
 document.addEventListener('visibilitychange',()=>{cancelTimer();if(document.hidden)set('countdown','일시 정지');else if(Date.now()>=nextAt)void refresh();else tick();});
 window.addEventListener('pagehide',()=>{disposed=true;cancelTimer();controller?.abort();});
 window.addEventListener('pageshow',e=>{if(e.persisted){disposed=false;schedule(0);}});
-void init();
+function chatContext(){return {page,code:$('region').value,publication:last?.usedTmFc||null,success:last?.lastSuccessAt||null,demo:$('demo').checked,stale:!!last?.stale||!!lastError,errorKind:lastError};}
+async function waitIdle(){const until=Date.now()+30000;while(busy&&Date.now()<until)await new Promise(r=>setTimeout(r,100));if(busy)throw new Error('기존 예보 조회가 끝나지 않았습니다.');}
+const ready=init();
+window.ForecastUI={ready,context:chatContext,catalog:()=>statusInfo,async apply(target,force=false){await ready;await waitIdle();if(target.page!==page)throw new Error('페이지가 일치하지 않습니다.');if(target.code&&!statusInfo.regions[page].some(r=>r.code===target.code))throw new Error('기능에 맞지 않는 지역입니다.');if(target.publication&&!['auto',...statusInfo.publications].includes(target.publication))throw new Error('유효하지 않은 발표본입니다.');const changedSelection=(target.code&&target.code!==$('region').value)||(target.publication&&target.publication!==$('issue').value);if(target.code)$('region').value=target.code;if(target.publication)$('issue').value=target.publication;if(changedSelection){last=null;lastError=null;regionInfo();safeStorage('kma.region.'+page,$('region').value);}if(changedSelection||force)await refresh();return chatContext();}};

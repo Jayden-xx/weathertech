@@ -1,3 +1,7 @@
+# Gemini 챗봇 포함 · 최신 연결 설정
+
+GEMINI_API_KEY는 Sites 비밀 환경변수입니다. GEMINI_MODEL 기본값은 gemini-3.5-flash-lite이며 thinkingLevel=low를 사용합니다. 지역·발표본은 동작별 단일 칸의 구조화 응답을 검증하고 서버가 배열로 바꿔 브라우저에 전달합니다. 실제 키는 소스에 포함하지 않습니다. Node 검사31개 통과. DB migration은 dist/_appgen_meta/drizzle 호환 경로에도 포함합니다.
+
 # 기후의 흐름 Sites 배포본
 
 기상청 MidFcstInfoService의 네 기능을 Sites의 Cloudflare Worker와 D1 공용 DB에서 실행합니다. 기존 로컬 프로젝트의 UI와 지역 코드 목록을 유지했습니다. 로컬 Python 서버나 사용자의 PC가 켜져 있을 필요가 없습니다.

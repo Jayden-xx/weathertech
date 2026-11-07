@@ -20,6 +20,9 @@ import urllib.error
 import urllib.parse
 import urllib.request
 import xml.etree.ElementTree as ET
+import sys
+# chat.py에서도 같은 설정·캐시 함수를 사용합니다. __main__ 중복 모듈 생성을 방지합니다.
+if __name__=='__main__': sys.modules['server']=sys.modules[__name__]
 
 ROOT = Path(__file__).resolve().parent
 KST = dt.timezone(dt.timedelta(hours=9))
@@ -409,6 +412,7 @@ class Handler(http.server.BaseHTTPRequestHandler):
                 return self.send_data(200,dict(ready=True,config=self.server.config,keyPath=str(KEY_FILE),regions=REGIONS,
                     publications=publications(),quota=self.server.gateway.store.stats(),url=f'http://127.0.0.1:{self.server.server_port}/outlook',
                     notice='하루 두 번 발표 · 최근 24시간 자료 · 30초는 새 자료 확인 주기'))
+            if path=='/api/chat/status': return self.send_data(200,self.server.chat.status())
             if path=='/api/forecast':
                 args=urllib.parse.parse_qs(parsed.query)
                 value=lambda k,d='':args.get(k,[d])[0]
@@ -426,7 +430,7 @@ class Handler(http.server.BaseHTTPRequestHandler):
                 result.update(demo=True,source='모의 응답 · 실제 예보 아님')
                 return self.send_data(200,result)
             routes={'/':'index.html','/outlook':'index.html','/land':'index.html','/temperature':'index.html','/sea':'index.html',
-                    '/static/app.js':'app.js','/static/style.css':'style.css'}
+                    '/static/app.js':'app.js','/static/chat.js':'chat.js','/static/style.css':'style.css'}
             if path in routes:
                 suffix=Path(routes[path]).suffix
                 typ={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8'}[suffix]
@@ -436,6 +440,32 @@ class Handler(http.server.BaseHTTPRequestHandler):
         except Exception:
             # 예외 문자열은 키/외부 URL을 포함할 수 있으므로 노출하지 않습니다.
             self.send_data(500,dict(ok=False,error=dict(kind='SERVER',message='서버 처리 오류입니다. 프로젝트 파일과 실행 환경을 확인하세요.',retryAfter=120)))
+
+    def do_POST(self):
+        # 같은 로컬 출처의 JSON 요청만 허용. CORS 허용 헤더는 제공하지 않습니다.
+        host=self.headers.get('Host','')
+        expected={f'127.0.0.1:{self.server.server_port}',f'localhost:{self.server.server_port}'}
+        if host not in expected or self.headers.get('Origin')!='http://'+host or self.headers.get('Sec-Fetch-Site') in {'cross-site','none'}:
+            return self.send_data(403,dict(ok=False,error=dict(kind='CHAT_ORIGIN',message='같은 로컬 사이트에서만 챗봇을 사용할 수 있습니다.')))
+        if self.headers.get('Content-Type','').split(';')[0].strip()!='application/json' or self.headers.get('Transfer-Encoding'):
+            return self.send_data(415,dict(ok=False,error=dict(kind='CHAT_INPUT',message='JSON 요청만 허용합니다.')))
+        try:
+            size=int(self.headers.get('Content-Length','0'))
+            if not 0<size<=32768: raise AppError('CHAT_INPUT','요청 크기는 32KB 이하여야 합니다.',0)
+            self.connection.settimeout(10)
+            body=json.loads(self.rfile.read(size));path=urllib.parse.urlsplit(self.path).path
+            from chat import check_fields
+            if path=='/api/chat/session':
+                check_fields(body,set());result=self.server.chat.session()
+            elif path=='/api/chat/clear':
+                check_fields(body,{'sessionId'});result=self.server.chat.clear(body['sessionId'])
+            elif path=='/api/chat':result=self.server.chat.ask(body)
+            elif path=='/api/chat/ack':result=self.server.chat.acknowledge(body)
+            else:return self.send_data(404,dict(ok=False,error=dict(kind='NOT_FOUND',message='허용되지 않은 요청입니다.')))
+            self.send_data(200,result)
+        except AppError as e:self.send_data(400,dict(ok=False,error=e.public()))
+        except (ValueError,UnicodeError):self.send_data(400,dict(ok=False,error=dict(kind='CHAT_INPUT',message='JSON 형식을 확인하세요.')))
+        except Exception:self.send_data(500,dict(ok=False,error=dict(kind='CHAT_SERVER',message='챗봇 처리 오류입니다. 예보 화면은 계속 이용할 수 있습니다.')))
 
 def main():
     parser=argparse.ArgumentParser(description='기상청 중기예보 로컬 서버')
@@ -461,8 +491,11 @@ def main():
         server.daemon_threads=True
         server.config=config
         server.gateway=Gateway(store,key,config)
+        from chat import ChatService,configuration
+        server.chat=ChatService(server.gateway,configuration())
         print(f'서버 준비 완료: http://127.0.0.1:{args.port}/outlook',flush=True)
         print(f'키 설정 상태: {config["state"]} / 설정 파일: {KEY_FILE}',flush=True)
+        print(f'Gemini 설정 상태: {server.chat.config["state"]} · 모델: {server.chat.config["model"]}',flush=True)
         if config.get('note'):print(config['note'],flush=True)
         print('터미널을 열어 두세요. Ctrl+C로 종료합니다. KEY.env 변경 후 재시작하세요.',flush=True)
         try:server.serve_forever()

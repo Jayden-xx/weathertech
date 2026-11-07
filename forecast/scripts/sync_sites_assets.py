@@ -8,6 +8,7 @@ html=html.replace('<code>KMA_SERVICE_KEY=발급받은_실제_인증키</code>','
 js=(local/'static'/'app.js').read_text(encoding='utf-8')
 js=js.replace("missing:'인증키 설정이 없습니다.'","missing:'서비스 연결 설정을 준비 중입니다.'")
 regions=json.loads((local/'regions.json').read_text(encoding='utf-8'))
-values={'HTML':html,'CSS':(local/'static'/'style.css').read_text(encoding='utf-8'),'JS':js,'REGIONS':regions,'DEMO':{p:fixture(p,regions[p][0]['code'],'202611070600') for p in regions}}
+chat_js=(local/'static'/'chat.js').read_text(encoding='utf-8').replace('관리자가 KEY.env의 GEMINI_API_KEY와 GEMINI_MODEL을 설정하고 재시작해야 합니다.','관리자가 Sites 서버의 비밀 환경변수 GEMINI_API_KEY와 GEMINI_MODEL을 설정해야 합니다.')
+values={'HTML':html,'CSS':(local/'static'/'style.css').read_text(encoding='utf-8'),'JS':js,'CHAT_JS':chat_js,'REGIONS':regions,'DEMO':{p:fixture(p,regions[p][0]['code'],'202611070600') for p in regions}}
 (site/'assets.mjs').write_text('\n'.join('export const '+k+'='+json.dumps(v,ensure_ascii=False)+';' for k,v in values.items())+'\n',encoding='utf-8')
 print('UI, regions and explicitly labeled demo responses embedded. KEY.env not copied.')
