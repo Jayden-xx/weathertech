@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>기후의 흐름 · 기상청 중기예보</title>
+  <link rel="stylesheet" href="/static/style.css"><script defer src="/static/app.js"></script>
+</head>
+<body>
+<a class="skip" href="#main">본문으로 이동</a>
+<aside class="sidebar">
+  <a class="brand" href="/outlook"><span class="brand-icon">≋</span><span>기후의 흐름<small>KMA MID-RANGE FORECAST</small></span></a>
+  <div class="nav-caption">예보 살펴보기</div>
+  <nav aria-label="중기예보 메뉴">
+    <a href="/outlook" data-page="outlook"><span>☷</span>중기전망<small>01</small></a>
+    <a href="/land" data-page="land"><span>☂</span>육상예보<small>02</small></a>
+    <a href="/temperature" data-page="temperature"><span>♧</span>기온예보<small>03</small></a>
+    <a href="/sea" data-page="sea"><span>≋</span>해상예보<small>04</small></a>
+  </nav>
+  <div class="sidebar-bottom"><span class="live-dot"></span>기상청 공공데이터<small>발표 06:00 · 18:00 KST<br>내일·모레는 단기예보를 이용하세요.</small></div>
+</aside>
+<div class="workspace">
+<header class="topbar"><span>날씨 데이터 실습실 <span class="slash">/</span> <strong id="breadcrumb">중기전망</strong></span><span class="top-note">한국 표준시 KST · 예보 자료</span></header>
+<main id="main">
+  <div class="page-heading">
+    <div class="hero-copy"><div class="eyebrow">✳ &nbsp; A LITTLE AHEAD / WEATHER NOTE</div><h1 id="page-title">중기전망</h1><p id="subtitle">앞으로의 날씨를 기상청 전망문으로 살펴보세요.</p><div class="issue-badge">하루 두 번, 새로운 날씨 이야기<span>06:00 / 18:00 <small>KST</small></span></div></div>
+    <div class="hero-art" aria-hidden="true">
+      <svg viewBox="0 0 560 290" xmlns="http://www.w3.org/2000/svg">
+        <rect x="40" y="87" width="477" height="147" rx="3" fill="#141414"/>
+        <path d="M32 60C85-6 219 52 192 100S13 209 63 265M480 12C416 18 441 49 510 55S543 94 491 104" fill="none" stroke="#141414" stroke-width="1.7"/>
+        <path d="M107 191C55 174 54 114 95 102C76 56 141 25 171 65C181 16 257 25 264 76C308 48 351 88 333 120C367 133 366 181 332 197C299 212 140 210 107 191Z" fill="#7cafe6" stroke="#141414" stroke-width="3.5" stroke-linejoin="round"/>
+        <path d="M123 91C125 75 141 71 151 80M205 59C222 48 238 56 243 70" fill="none" stroke="#fffef4" stroke-width="9" stroke-linecap="round"/>
+        <path d="M148 135Q160 124 172 135M216 135Q228 124 240 135M170 155Q194 178 218 155" fill="none" stroke="#141414" stroke-width="3.5" stroke-linecap="round"/>
+        <path d="M370 92C393 113 442 161 427 195C417 220 379 228 360 204C337 173 354 127 370 92Z" fill="#7cafe6" stroke="#141414" stroke-width="3.5"/>
+        <path d="M376 126Q392 140 395 153" stroke="#fffef4" stroke-width="9" fill="none" stroke-linecap="round"/>
+        <path d="M346 40L356 63L381 61L364 80L371 104L349 92L329 105L333 80L313 64L338 61ZM460 210L467 234L492 241L467 248L460 272L453 248L429 241L453 234Z" fill="#fffef4" stroke="#141414" stroke-width="2.5"/>
+        <path d="M37 214h20v20H37zm-20 20h20v20H17zm475-106h20v20h-20zm20 20h20v20h-20z" fill="#141414"/>
+        <path d="M86 220C182 254 321 230 471 151" fill="none" stroke="#141414" stroke-width="19" stroke-linecap="round"/>
+        <path d="M86 220C182 254 321 230 471 151" fill="none" stroke="#fffef4" stroke-width="15" stroke-linecap="round"/>
+        <text x="104" y="276" font-family="Georgia,serif" font-size="21" fill="#141414">A forecast, not a crystal ball.</text>
+      </svg><span class="art-label">THE WEATHER CLUB ↗</span>
+    </div>
+  </div>
+  <section class="controls" aria-label="예보 조회 조건">
+    <label>예보 지역<select id="region" aria-label="예보 지역"></select></label>
+    <label>발표본 선택<select id="issue" aria-label="발표본 선택"><option value="auto">최신 유효 발표본 자동 확인</option></select></label>
+    <button id="refresh" class="primary">↻ 지금 확인</button>
+    <label class="demo-switch"><input id="demo" type="checkbox"> 모의 응답으로 화면 체험</label>
+    <p id="region-info" class="control-foot">지역코드를 불러오는 중입니다.</p>
+  </section>
+  <div id="status" role="status" aria-live="polite" class="status">서버 상태를 확인하고 있습니다.</div>
+  <section id="setup" class="setup" hidden>
+    <div class="setup-icon">⌘</div><div><h2>인증키를 설정하면 실제 예보를 볼 수 있어요</h2><p id="key-state"></p><p>프로젝트 폴더의 <b>KEY.env</b> 파일에 아래 설정을 저장한 뒤 서버를 재시작하세요.</p><code>KMA_SERVICE_KEY=발급받은_실제_인증키</code><p class="path" id="key-path"></p><p><a href="https://www.data.go.kr/data/15059468/openapi.do" target="_blank" rel="noopener noreferrer">공공데이터포털에서 중기예보 활용신청 ↗</a> · 실제 키는 채팅이나 화면에 입력하지 마세요.</p><p>설정 전에는 위의 ‘모의 응답으로 화면 체험’을 켜서 그래프를 확인할 수 있습니다.</p></div>
+  </section>
+  <section class="meta-grid" aria-label="자료 상태">
+    <div><span>자료 발표시각 · 요청 기준</span><strong id="publication">미확인</strong><small>API 반환 시각이 아닌 조회에 사용한 시각</small></div>
+    <div><span>마지막 서버 확인</span><strong id="checked">—</strong><small id="last-success">실제 API 성공 이력 없음</small></div>
+    <div><span>다음 자동 확인</span><strong id="countdown">30초</strong><small>숨긴 탭에서는 자동 확인을 멈춥니다</small></div>
+  </section>
+  <section id="results" hidden>
+    <div class="section-heading"><h2 id="result-title">예보 결과</h2><span id="source" class="tag"></span></div>
+    <p id="data-note" class="muted"></p><div id="warnings" class="warning-list"></div>
+    <article id="outlook-panel" class="panel outlook" hidden><div class="article-label">기상전망 원문</div><div id="outlook-text"></div></article>
+    <div id="cards" class="weather-cards"></div>
+    <section id="chart-panel" class="panel" hidden><div class="chart-heading"><h3 id="chart-title"></h3><div id="legend" class="legend"></div></div><p class="muted">점이나 막대에 마우스를 올리거나 Tab 키로 이동하면 값을 확인할 수 있습니다.</p><div class="chart-scroll"><svg id="chart" role="img" aria-label="날짜별 예보 그래프" viewBox="0 0 900 330"></svg></div></section>
+    <section id="table-panel" class="panel" hidden><h3>예보 수치표</h3><p class="muted">모바일에서는 그래프와 표를 좌우로 밀어 전체 내용을 확인하세요.</p><div class="table-scroll"><table id="data-table"></table></div></section>
+    <details class="panel raw"><summary>실제 사용한 응답 원문과 조회 정보 보기</summary><p id="raw-note" class="muted"></p><pre id="raw"></pre></details>
+  </section>
+  <section id="empty" class="panel empty"><span>≋</span><h2>앞으로의 날씨를 준비하세요</h2><p>지역과 발표본을 선택하면 예보가 이곳에 표시됩니다.<br>인증키가 없어도 모의 응답으로 화면을 체험할 수 있습니다.</p></section>
+  <section class="foot-grid"><div class="panel explanation"><h3>이 자료를 읽는 방법</h3><p id="explainer"></p><p>‘미제공’은 0이 아닙니다. 예보는 앞으로의 예상이며 실제 관측값과 다릅니다. 30초마다 확인해도 새 예보는 하루 두 번 발표됩니다.</p></div><div class="panel usage"><h3>중앙 서버 호출 관리</h3><div><strong id="quota">0</strong><span> / 9,000회</span></div><p>최근 24시간 · 네 기능 합산</p><p id="quota-warning">8,000회부터 경고 · 외부 호출은 전체 최소 30초 간격</p><p class="muted">다른 프로그램의 같은 키 사용량은 포함되지 않습니다.</p></div></section>
+  <footer><span>자료: 기상청 MidFcstInfoService · 지역: 첨부 가이드 / 2025.12 Excel</span><span id="server-url">서버 연결 확인 중</span></footer>
+</main>
+</div>
+</body></html>

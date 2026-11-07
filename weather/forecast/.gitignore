@@ -1,0 +1,15 @@
+# Credentials and runtime files (all descendants)
+**/KEY.env
+**/KEY.env.*
+!**/KEY.env.example
+**/.env
+**/.env.*
+**/.dev.vars*
+**/.runtime/
+**/.sites-runtime/
+**/.wrangler/
+**/__pycache__/
+**/*.pyc
+**/*.sqlite*
+**/node_modules/
+**/dist/

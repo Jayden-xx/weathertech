@@ -1,0 +1,14 @@
+node_modules/
+dist/
+.runtime/
+.sites-runtime/
+.wrangler/
+outputs/
+KEY.env
+KEY.env.*
+!KEY.env.example
+.env
+.env.*
+.dev.vars*
+*.sqlite*
+__pycache__/

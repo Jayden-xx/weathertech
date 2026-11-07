@@ -1,0 +1,36 @@
+{
+  "source_zip": "기상청28_중기예보 조회서비스_오픈API활용가이드_251212.zip",
+  "files": [
+    {
+      "name": "기상청28_중기예보 조회서비스_오픈API활용가이드_241128.docx",
+      "sha256": "515d69efbd0b9f8dd31e44fe0a6f8393bcb5bf14ffe39630f6c1f19b032952f1",
+      "bytes": 137214
+    },
+    {
+      "name": "중기예보_중기기온예보구역코드_2025.12.xlsx",
+      "sha256": "a9f9715f8adb1f7805d074ee9d0744a5b7d6a5f066a0829291c87ad71e589d59",
+      "bytes": 27157
+    }
+  ],
+  "extraction": {
+    "outlook": 10,
+    "land": 10,
+    "temperature": 203,
+    "sea": 13,
+    "temperature_sheet": "Sheet3",
+    "temperature_filter": "특성=C",
+    "temperature_rows_including_header": 241
+  },
+  "limitations": [
+    "가이드 예제는 최신 응답 아님",
+    "Low/High 계산 의미 미확정으로 시각화 제외",
+    "공식 일일 호출량 초기화 시각 미확인",
+    "18시 실제 응답과 모든 지역은 추가 확인 필요"
+  ],
+  "live_verification": "2026-11-07: KEY.env 설정 후 네 기능 202611070600 실제 응답 정상 확인",
+  "ui_reference": [
+    "https://kr.pinterest.com/pin/297870962874071273/",
+    "https://pin.it/2PKAFkGUd",
+    "https://i.pinimg.com/736x/d0/da/f0/d0daf0f78cee356911d3799d19cdcb05.jpg"
+  ]
+}

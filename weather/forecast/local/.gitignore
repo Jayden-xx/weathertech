@@ -1,0 +1,11 @@
+KEY.env
+KEY.env.*
+!KEY.env.example
+.env
+.env.*
+*.env
+!KEY.env.example
+.runtime/
+__pycache__/
+*.pyc
+test-results/
