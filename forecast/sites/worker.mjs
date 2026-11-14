@@ -36,8 +36,10 @@ export default{async fetch(request,env,ctx){
    if(!FUNCTIONS[page]||!REGIONS[page].some(r=>r.code===code)||issue!=='auto'&&!publications().includes(issue))throw new APIError('INPUT','올바른 지역과 최근 발표본을 선택하세요.',30);
    const used=issue==='auto'?publications()[0]:issue,payload=structuredClone(DEMO[page]);
    const item=payload.response.body.items.item[0];if(page!=='outlook')item.regId=code;
+   const surge=page==='sea'&&url.searchParams.get('scenario')==='surge';
+   if(surge){const ranges={4:[.2,.5],5:[4,6],6:[.5,1],7:[3,5],8:[.2,.5],9:[2,4],10:[.2,.5]};for(const [day,[low,high]] of Object.entries(ranges)){for(const period of Number(day)<=7?['Am','Pm']:['']){item['wh'+day+'A'+period]=low;item['wh'+day+'B'+period]=high;item['wf'+day+period]=high>=4?'흐리고 비':high<=1?'맑음':'구름많음';}}}
    const result=await gateway.result(page,code,issue,used,{payload,success:Date.now(),cached:false});
-   return json({...result,demo:true,source:'모의 응답 · 실제 예보 아님'});
+   return json({...result,demo:true,scenario:surge?'surge':'basic',source:surge?'급변 파고 체험 · 더미':'모의 응답 · 실제 예보 아님'});
   }
   return json({error:'페이지를 찾을 수 없습니다.'},404);
  }catch(e){return json({ok:false,error:(e instanceof APIError?e:new APIError('SERVER','자료 처리 중 오류가 발생했습니다. 잠시 후 다시 확인해 주세요.',120)).public()},e instanceof APIError?400:503);}

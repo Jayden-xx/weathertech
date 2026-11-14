@@ -14,7 +14,6 @@
 cd local
 python -m unittest -v test_server test_chat
 cd ../
-python scripts/sync_sites_assets.py
 cd sites
 node --test test.mjs
 node build.mjs
@@ -27,3 +26,14 @@ Sites DB migration은 drizzle 원본과 dist/_appgen_meta/drizzle 호환 경로�
 공식 문서: https://ai.google.dev/gemini-api/docs/models/gemini-3.5-flash-lite · https://ai.google.dev/gemini-api/docs/thinking · https://ai.google.dev/api/generate-content
 
 로컬 설정법과 상세 구조는 local/README.md, 검증 이력은 local/VERIFICATION.md를 참고하세요. 실제 KEY.env, 실행DB, .git, 빌드 결과는 포함하지 않습니다.
+
+
+## 2026-11-14 업데이트
+
+- 해상예보 상단에서 파고에 따라 높이가 변하는 파도와 날씨 애니메이션을 제공합니다.
+- 날짜 선택과 재생·일시 정지를 지원합니다.
+- **파도 데이터 → 급변 파고 체험 · 더미**로 0.2~0.5m, 4~6m 등 큰 변화를 체험합니다. 실제 예보와 구분해 표시합니다.
+- 최신 Sites 소스는 `sites/`입니다. `local/` Python 실행본에는 오늘의 애니메이션·급변 더미를 이식하지 않았습니다.
+- `scripts/sync_sites_assets.py`는 로컬 UI로 Sites assets를 덮어씁니다. 현재는 실행하지 말고 두 UI를 먼저 조정하세요.
+- 오늘 기록과 발표 자료: [작업 인계](docs/2026-11-14/HANDOFF.md).
+
