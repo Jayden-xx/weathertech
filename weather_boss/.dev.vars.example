@@ -1,0 +1,2 @@
+# Copy to .dev.vars on a private device only. Never commit real keys.
+KMA_SERVICE_KEY=

@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "synthetic": true,
+  "source": "날씨 보스용 창작 예시 덤프. 실제 관측·예보·과거 재난 기록이 아닙니다.",
+  "timeSlots": ["예시 08:00", "예시 09:00", "예시 10:00", "예시 11:00", "예시 12:00", "예시 13:00"],
+  "scenarios": {
+    "heatwave": {"title": "극한 폭염", "description": "39~46°C · 열기 구슬 집중 공격", "temperature": [39,41,44,46,43,40], "wind": [1,1.5,2,1.5,1,1], "rain": [0,0,0,0,0,0], "lightning": [0,0,0,0,0,0]},
+    "thunderstorm": {"title": "낙뢰 폭주", "description": "전 시간대 낙뢰 신호 · 연속 번개", "temperature": [25,24,23,22,23,24], "wind": [5,7,9,11,8,6], "rain": [1,1,1,1,1,1], "lightning": [1,2,3,2,3,1]},
+    "typhoon": {"title": "초강풍 태풍", "description": "35~60m/s · 비바람과 번개 복합 공격", "temperature": [27,26,25,24,25,26], "wind": [35,45,55,60,52,40], "rain": [1,1,1,1,1,1], "lightning": [0.2,1,1.5,2,1,0.2]}
+  }
+}
